@@ -1,61 +1,103 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2
 jobs:
-  build:
+  install_ruby_dependencies:
     docker:
-      # specify the version you desire here
-       - image: circleci/ruby:2.5.1-node-browsers
-      
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
+      - image: circleci/ruby:2.5.1-node
     working_directory: ~/repo
-
     steps:
       - checkout
-
-      # Download and cache dependencies
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "Gemfile.lock" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
+            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
       - run:
-          name: install dependencies
-          command: |
-            bundle install --jobs=4 --retry=3 --path vendor/bundle
-
+          command: bundle install --deployment
       - save_cache:
           paths:
-            - ./vendor/bundle
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-        
-      # Database setup
-      - run: bundle exec rake db:create
-      - run: bundle exec rake db:schema:load
+            - vendor/bundle
+          key: ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
 
-      # run tests!
+  install_javascript_dependencies:
+    docker:
+      - image: circleci/ruby:2.5.1-node
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
       - run:
-          name: run tests
-          command: |
-            mkdir /tmp/test-results
-            TEST_FILES="$(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)"
-            
-            bundle exec rspec --format progress \
-                            --format RspecJunitFormatter \
-                            --out /tmp/test-results/rspec.xml \
-                            --format progress \
-                            $TEST_FILES
+          command: yarn
+      - save_cache:
+          paths:
+            - node_modules
+          key: javascript-dependencies-v1-{{ checksum "yarn.lock" }}
 
-      # collect reports
-      - store_test_results:
-          path: /tmp/test-results
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: test-results
+  run_rubocop:
+    docker:
+      - image: circleci/ruby:2.5.1-node
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
+            - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
+      - run:
+          command: bundle config --local path vendor/bundle
+      - run:
+          command: bundle exec rubocop
+
+  run_reek:
+    docker:
+      - image: circleci/ruby:2.5.1-node
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
+            - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
+      - run:
+          command: bundle config --local path vendor/bundle
+      - run:
+          command: bundle exec reek
+
+  run_brakeman:
+    docker:
+      - image: circleci/ruby:2.5.1-node
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
+            - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
+      - run:
+          command: bundle config --local path vendor/bundle
+      - run:
+          command: bundle exec brakeman
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - install_ruby_dependencies
+      - install_javascript_dependencies
+      - run_rubocop:
+          requires:
+            - install_ruby_dependencies
+            - install_javascript_dependencies
+      - run_reek:
+          requires:
+            - install_ruby_dependencies
+            - install_javascript_dependencies
+      - run_brakeman:
+          requires:
+            - install_ruby_dependencies
+            - install_javascript_dependencies
