@@ -92,12 +92,9 @@ workflows:
       - run_rubocop:
           requires:
             - install_ruby_dependencies
-            - install_javascript_dependencies
       - run_reek:
           requires:
             - install_ruby_dependencies
-            - install_javascript_dependencies
       - run_brakeman:
           requires:
             - install_ruby_dependencies
-            - install_javascript_dependencies
