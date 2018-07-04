@@ -99,6 +99,8 @@ jobs:
       - run:
           command: bundle config --local path vendor/bundle
       - run:
+          command: dockerize -wait tcp://localhost:5432
+      - run:
           command: bundle exec rails db:setup
       - run:
           command: bundle exec rspec
