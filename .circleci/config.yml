@@ -83,6 +83,26 @@ jobs:
       - run:
           command: bundle exec brakeman
 
+  run_tests:
+    docker:
+      - image: circleci/ruby:2.5.1-node
+      - image: postgres:10.4
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+      - restore_cache:
+          keys:
+            - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
+      - run:
+          command: bundle config --local path vendor/bundle
+      - run:
+          command: bundle exec rails db:setup
+      - run:
+          command: bundle exec rspec
+
 workflows:
   version: 2
   main:
@@ -98,3 +118,7 @@ workflows:
       - run_brakeman:
           requires:
             - install_ruby_dependencies
+      - run_tests:
+          requires:
+            - install_ruby_dependencies
+            - install_javascript_dependencies
