@@ -67,3 +67,5 @@ end
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
 gem 'webpacker', '~> 3.5'
+
+gem 'pg'
