@@ -8,13 +8,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+            - ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
       - run:
           command: bundle install --deployment
       - save_cache:
           paths:
             - vendor/bundle
-          key: ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+          key: ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
 
   install_javascript_dependencies:
     docker:
@@ -40,7 +40,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+            - ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
       - restore_cache:
           keys:
             - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
@@ -57,7 +57,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+            - ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
       - restore_cache:
           keys:
             - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
@@ -74,7 +74,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+            - ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
       - restore_cache:
           keys:
             - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
@@ -92,7 +92,7 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - ruby-dependencies-v5-{{ checksum "Gemfile.lock" }}
+            - ruby-dependencies-v6-{{ checksum "Gemfile.lock" }}
       - restore_cache:
           keys:
             - javascript-dependencies-v1-{{ checksum "yarn.lock" }}
