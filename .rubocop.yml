@@ -1,0 +1,10 @@
+Style/Documentation:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - node_modules/**/*
+    - db/**/*
+    - config/**/*
+    - Rakefile
+    - bin/**/*

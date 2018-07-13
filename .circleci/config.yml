@@ -47,7 +47,7 @@ jobs:
       - run:
           command: bundle config --local path vendor/bundle
       - run:
-          command: bundle exec rubocop || true
+          command: bundle exec rubocop
 
   run_reek:
     docker:
