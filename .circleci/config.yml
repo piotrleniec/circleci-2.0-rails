@@ -105,6 +105,16 @@ jobs:
       - run:
           command: bundle exec rspec
 
+  build_docker_image:
+    docker:
+      - image: docker:18.05.0
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          command: docker build -t app:$CIRCLE_BRANCH .
+
 workflows:
   version: 2
   main:
@@ -124,3 +134,9 @@ workflows:
           requires:
             - install_ruby_dependencies
             - install_javascript_dependencies
+      - build_docker_image:
+          requires:
+            - run_rubocop
+            - run_reek
+            - run_brakeman
+            - run_tests
