@@ -8,3 +8,4 @@ AllCops:
     - config/**/*
     - Rakefile
     - bin/**/*
+    - vendor/bundle/**/*
